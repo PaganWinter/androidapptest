@@ -1,29 +1,22 @@
 package com.voidonaut.androidapptest;
 
-import static com.voidonaut.androidapptest.util.CameraHelper._cameraAvailable;
-import static com.voidonaut.androidapptest.util.CameraHelper._getCameraInstance;
 import static com.voidonaut.androidapptest.util.MediaHelper._getOutputMediaFile;
 import static com.voidonaut.androidapptest.util.MediaHelper._saveToFile;
 
 import java.io.File;
-
-import com.voidonaut.androidapptest.FromXML;
-import com.voidonaut.androidapptest.R;
-import com.voidonaut.androidapptest.CameraPreview;
-import com.voidonaut.androidapptest.util.Log;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
-import android.os.Build;
-import android.support.v4.app.NavUtils;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.annotation.TargetApi;
+import com.voidonaut.androidapptest.util.Log;
 
 
 /**
@@ -35,47 +28,113 @@ public class CameraActivity extends Activity implements PictureCallback {
 
     protected static final String EXTRA_IMAGE_PATH = "com.voidonaut.androidapptest.CameraActivity.EXTRA_IMAGE_PATH";
 
-    private Camera camera;
+    private Camera mCamera;
+    private Camera.Parameters mCamParams;
     private CameraPreview cameraPreview;
+    private ImageView focusImg;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
         setResult(RESULT_CANCELED);
+
+        focusImg = (ImageView) findViewById(R.id.cam_focus);
         // Camera may be in use by another activity or the system or not available at all
-        camera = _getCameraInstance();
-        if(_cameraAvailable(camera)){
-            initCameraPreview();
+        mCamera = null;
+		try {
+			mCamera = Camera.open();
+		} catch (Exception e) {
+			// Camera is not available or doesn't exist
+			Log.d("Camera.open failed", e);
+		}
+
+        if(mCamera != null){
+            // Get camera parameters
+        	mCamParams = mCamera.getParameters();
+        	Log.d(mCamParams.flatten());
+
+        	//Parameters interested in: flash-mode-values, focus-mode-values, preview-size-values, picture-size-values
+        	// List<String> flashModes = mCamParams.getSupportedFlashModes();
+        	// List<Camera.Area> focusAreas = mCamParams.getFocusAreas();
+        	// Integer maxFocusAreas = mCamParams.getMaxNumFocusAreas();
+        	List<Camera.Size> pictureSizes = mCamParams.getSupportedPictureSizes();
+        	List<Camera.Size> previewSizes = mCamParams.getSupportedPreviewSizes();
+        	for (Integer i = 0 ; i < pictureSizes.size() ; i++) {
+            	// Log.d(Integer.toString(pictureSizes.get(i).height) + " " + Integer.toString(pictureSizes.get(i).width) + " ; ");
+        	}
+
+        	// Set camera parameters
+
+        	// Setting picture size to first entry in array returned by getSupportedPictureSizes()
+    		mCamParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
+    		mCamParams.setPreviewSize(previewSizes.get(0).width, previewSizes.get(0).height);
+    		mCamParams.setJpegQuality(100);
+
+        	if (mCamParams.getSupportedFlashModes().contains(Camera.Parameters.FLASH_MODE_AUTO)) {
+            	mCamParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        	}
+        	if (mCamParams.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+        	    mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+//        		mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        	} else {
+        		mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        	}
+
+    		mCamera.setParameters(mCamParams);
+    		focusImg.setAlpha(30);
+
+    		Toast.makeText(getApplicationContext(), "Camera Parameters set", Toast.LENGTH_SHORT).show();
+
+        	// Show the camera view on the activity
+            cameraPreview = (CameraPreview) findViewById(R.id.camera_preview);
+            cameraPreview.init(mCamera);
         } else {
             finish();
         }
-        /* Show the Up button in the action bar. */
+
+        // Show the Up button in the action bar.
         //  setupActionBar();
 	}
 
-    /* Show the camera view on the activity */
-    private void initCameraPreview() {
-        cameraPreview = (CameraPreview) findViewById(R.id.camera_preview);
-        cameraPreview.init(camera);
-    }
+
+    public AutoFocusCallback _cameraFocused = new AutoFocusCallback() {
+		@SuppressWarnings("deprecation")
+		@Override
+		public void onAutoFocus(boolean success, Camera camera) {
+			// TODO Auto-generated method stub
+			focusImg.setAlpha(100);
+	        Toast.makeText(getApplicationContext(), "Focused", Toast.LENGTH_SHORT).show();
+		}
+	};
 
     @FromXML
     public void onCaptureClick(View button){
         // Take a picture with a callback when the photo has been created
         // Here you can add callbacks if you want to give feedback when the picture is being taken
-        camera.takePicture(null, null, this);
+        Toast.makeText(getApplicationContext(), "Button clicked", Toast.LENGTH_SHORT).show();
+        mCamera.takePicture(null, null, this);
+//    	mCamera.autoFocus(_cameraFocused);
     }
+
+    @SuppressWarnings("deprecation")
+	public void onFocusClick(View button){
+        Toast.makeText(getApplicationContext(), "Focus clicked", Toast.LENGTH_SHORT).show();
+		focusImg.setAlpha(30);
+    	mCamera.autoFocus(_cameraFocused);
+    }
+
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
         Log.d("Picture taken");
-        String path = savePictureToFileSystem(data);
+        Toast.makeText(getApplicationContext(), "Picture taken", Toast.LENGTH_LONG).show();
+        String path = _savePictureToFileSystem(data);
         setResult(path);
         finish();
     }
 
-    private static String savePictureToFileSystem(byte[] data) {
+    private static String _savePictureToFileSystem(byte[] data) {
         File file = _getOutputMediaFile();
         _saveToFile(data, file);
         return file.getAbsolutePath();
@@ -95,13 +154,14 @@ public class CameraActivity extends Activity implements PictureCallback {
     }
  
     private void releaseCamera() {
-        if(camera != null){
-            camera.release();
-            camera = null;
+        if(mCamera != null){
+        	mCamera.release();
+        	mCamera = null;
         }
     }
 
-    /* Set up the {@link android.app.ActionBar}, if the API is available. */
+/*
+    // Set up the {@link android.app.ActionBar}, if the API is available.
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void setupActionBar() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -132,5 +192,6 @@ public class CameraActivity extends Activity implements PictureCallback {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+*/
 
 }

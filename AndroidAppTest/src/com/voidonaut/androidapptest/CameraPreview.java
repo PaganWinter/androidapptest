@@ -7,7 +7,7 @@ import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
- 
+
 /**
  *
  * @author paul.blundell
@@ -29,7 +29,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public CameraPreview(Context context) {
         super(context);
     }
- 
+
     public void init(Camera camera) {
         this.mCamera = camera;
         initSurfaceHolder();

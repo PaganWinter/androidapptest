@@ -14,7 +14,15 @@
         android:contentDescription="@string/content_desc_overlay"
         android:src="@drawable/cam_target" />
 -->
- 
+
+    <ImageView
+        android:id="@+id/cam_focus"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:alpha="30"
+        android:contentDescription="@string/content_desc_overlay"
+        android:src="@drawable/cam_focus" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,5 +30,13 @@
         android:onClick="onCaptureClick"
         android:padding="@dimen/padding_medium"
         android:text="@string/button_capture_text" />
+ 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_horizontal"
+        android:onClick="onFocusClick"
+        android:padding="@dimen/padding_medium"
+        android:text="@string/button_focus_text" />
  
 </FrameLayout>

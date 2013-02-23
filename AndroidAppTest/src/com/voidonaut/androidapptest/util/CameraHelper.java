@@ -11,19 +11,4 @@ import android.hardware.Camera;
  */
 public class CameraHelper {
 
-	public static boolean _cameraAvailable(Camera camera) {
-		return camera != null;
-	}
-
-	public static Camera _getCameraInstance() {
-		Camera c = null;
-		try {
-			c = Camera.open();
-		} catch (Exception e) {
-			// Camera is not available or doesn't exist
-			Log.d("getCamera failed", e);
-		}
-		return c;
-	}
-
 }
