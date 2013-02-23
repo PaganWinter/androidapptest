@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AndroidAppTest</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_send">Send</string>
+    <string name="title_activity_display_message">My Message</string>
+
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="button_use_camera">Use Camera</string>
+    <string name="button_capture_text">SNAP</string>
+    <string name="content_desc_overlay">overlay</string>
+    <string name="content_desc_image_just_taken">Image just taken</string>
+
+    <string name="button_use_default_camera">Use Default Camera</string>
+
+</resources>
