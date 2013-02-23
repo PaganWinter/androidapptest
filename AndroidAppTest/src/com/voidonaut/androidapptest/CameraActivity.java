@@ -14,6 +14,8 @@ import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
 import com.voidonaut.androidapptest.util.Log;
@@ -32,6 +34,8 @@ public class CameraActivity extends Activity implements PictureCallback {
     private Camera.Parameters mCamParams;
     private CameraPreview cameraPreview;
     private ImageView focusImg;
+    private ImageView mImageOverlay;
+    private SeekBar mSeekbar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +44,24 @@ public class CameraActivity extends Activity implements PictureCallback {
         setResult(RESULT_CANCELED);
 
         focusImg = (ImageView) findViewById(R.id.cam_focus);
+        mImageOverlay = (ImageView) findViewById(R.id.cam_image_overlay);
+        mSeekbar = (SeekBar) findViewById(R.id.cam_overlay_alpha);
+
+        mSeekbar.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
+            @SuppressWarnings("deprecation")
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // TODO Auto-generated method stub
+            	mImageOverlay.setAlpha(progress);
+            	Log.d(Integer.toString(progress));
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+        });
+
         // Camera may be in use by another activity or the system or not available at all
         mCamera = null;
 		try {
@@ -104,6 +126,7 @@ public class CameraActivity extends Activity implements PictureCallback {
 		public void onAutoFocus(boolean success, Camera camera) {
 			// TODO Auto-generated method stub
 			focusImg.setAlpha(100);
+	        Log.d("Focused");
 	        Toast.makeText(getApplicationContext(), "Focused", Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -112,6 +135,7 @@ public class CameraActivity extends Activity implements PictureCallback {
     public void onCaptureClick(View button){
         // Take a picture with a callback when the photo has been created
         // Here you can add callbacks if you want to give feedback when the picture is being taken
+        Log.d("Snap clicked");
         Toast.makeText(getApplicationContext(), "Button clicked", Toast.LENGTH_SHORT).show();
         mCamera.takePicture(null, null, this);
 //    	mCamera.autoFocus(_cameraFocused);
@@ -119,6 +143,7 @@ public class CameraActivity extends Activity implements PictureCallback {
 
     @SuppressWarnings("deprecation")
 	public void onFocusClick(View button){
+        Log.d("Focus clicked");
         Toast.makeText(getApplicationContext(), "Focus clicked", Toast.LENGTH_SHORT).show();
 		focusImg.setAlpha(30);
     	mCamera.autoFocus(_cameraFocused);
