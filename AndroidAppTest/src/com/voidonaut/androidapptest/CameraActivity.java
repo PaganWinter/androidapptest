@@ -43,7 +43,7 @@ public class CameraActivity extends Activity implements PictureCallback {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
         setResult(RESULT_CANCELED);
-        /* Camera may be in use by another activity or the system or not available at all */
+        // Camera may be in use by another activity or the system or not available at all
         camera = _getCameraInstance();
         if(_cameraAvailable(camera)){
             initCameraPreview();
