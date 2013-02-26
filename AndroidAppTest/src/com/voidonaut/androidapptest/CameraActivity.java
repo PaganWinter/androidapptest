@@ -10,14 +10,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
+import com.voidonaut.androidapptest.util.BitmapHelper;
 import com.voidonaut.androidapptest.util.Log;
 
 
@@ -36,6 +39,14 @@ public class CameraActivity extends Activity implements PictureCallback {
     private ImageView focusImg;
     private ImageView mImageOverlay;
     private SeekBar mSeekbar;
+    private List<String> mFlashModes;
+    private List<String> mFocusModes;
+    private Button mFlashButton;
+    private Button mFocusButton;
+    private Button mSaveButton;
+    private Button mDiscardButton;
+    private Button mCameraChangeButton;
+    private byte[] mPictureData;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +54,33 @@ public class CameraActivity extends Activity implements PictureCallback {
 		setContentView(R.layout.activity_camera);
         setResult(RESULT_CANCELED);
 
-        focusImg = (ImageView) findViewById(R.id.cam_focus);
+        focusImg = (ImageView) findViewById(R.id.cam_focus_crosshair);
         mImageOverlay = (ImageView) findViewById(R.id.cam_image_overlay);
+
         mSeekbar = (SeekBar) findViewById(R.id.cam_overlay_alpha);
+
+        mFlashButton = (Button) findViewById(R.id.cam_controls_flash);
+//      mFocusButton = (Button) findViewById(R.id.cam_controls_focus);
+        mSaveButton = (Button) findViewById(R.id.cam_controls_save);
+        mDiscardButton = (Button) findViewById(R.id.cam_controls_discard);
+        mCameraChangeButton = (Button) findViewById(R.id.cam_change_camera);
+
+        mSaveButton.setVisibility(View.GONE);
+        mDiscardButton.setVisibility(View.GONE);
+		focusImg.setAlpha(100);
+
+	    // Get the message from the intent
+	    Intent intent = getIntent();
+	    String overlayImgPath = intent.getStringExtra(MainActivity.EXTRA_OVERLAY_IMG_PATH);
+	    mImageOverlay.setImageBitmap(BitmapHelper._decodeSampledBitmap(overlayImgPath, 300, 250));
+
 
         mSeekbar.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
             @SuppressWarnings("deprecation")
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // TODO Auto-generated method stub
             	mImageOverlay.setAlpha(progress);
-            	Log.d(Integer.toString(progress));
+//            	Log.d(Integer.toString(progress));
             }
             public void onStartTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
@@ -61,6 +89,12 @@ public class CameraActivity extends Activity implements PictureCallback {
                 // TODO Auto-generated method stub
             }
         });
+
+        // If front camera exists, enable Change Camera Button
+        if (_getFrontCameraId() < 0) {
+        	mCameraChangeButton.setVisibility(View.GONE);
+        }
+        Log.d(Integer.toString(_getFrontCameraId()));
 
         // Camera may be in use by another activity or the system or not available at all
         mCamera = null;
@@ -72,41 +106,38 @@ public class CameraActivity extends Activity implements PictureCallback {
 		}
 
         if(mCamera != null){
-            // Get camera parameters
+
+        	// Get camera parameters
         	mCamParams = mCamera.getParameters();
         	Log.d(mCamParams.flatten());
-
         	//Parameters interested in: flash-mode-values, focus-mode-values, preview-size-values, picture-size-values
-        	// List<String> flashModes = mCamParams.getSupportedFlashModes();
-        	// List<Camera.Area> focusAreas = mCamParams.getFocusAreas();
-        	// Integer maxFocusAreas = mCamParams.getMaxNumFocusAreas();
         	List<Camera.Size> pictureSizes = mCamParams.getSupportedPictureSizes();
         	List<Camera.Size> previewSizes = mCamParams.getSupportedPreviewSizes();
-        	for (Integer i = 0 ; i < pictureSizes.size() ; i++) {
-            	// Log.d(Integer.toString(pictureSizes.get(i).height) + " " + Integer.toString(pictureSizes.get(i).width) + " ; ");
-        	}
+        	mFlashModes = mCamParams.getSupportedFlashModes();
+        	mFocusModes = mCamParams.getSupportedFocusModes();
+            // List<Camera.Area> focusAreas = mCamParams.getFocusAreas();
+        	// Integer maxFocusAreas = mCamParams.getMaxNumFocusAreas();
 
         	// Set camera parameters
-
         	// Setting picture size to first entry in array returned by getSupportedPictureSizes()
     		mCamParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
     		mCamParams.setPreviewSize(previewSizes.get(0).width, previewSizes.get(0).height);
     		mCamParams.setJpegQuality(100);
 
-        	if (mCamParams.getSupportedFlashModes().contains(Camera.Parameters.FLASH_MODE_AUTO)) {
+    		if (mCamParams.getSupportedFlashModes().contains(Camera.Parameters.FLASH_MODE_AUTO)) {
             	mCamParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
         	}
+        	mFlashButton.setText(Camera.Parameters.FLASH_MODE_AUTO);
         	if (mCamParams.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-        	    mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-//        		mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+//        		mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        		mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         	} else {
         		mCamParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         	}
-
+//        	mFocusButton.setText(Camera.Parameters.FOCUS_MODE_AUTO);
     		mCamera.setParameters(mCamParams);
-    		focusImg.setAlpha(30);
+//    		Toast.makeText(getApplicationContext(), "Camera Parameters set", Toast.LENGTH_SHORT).show();
 
-    		Toast.makeText(getApplicationContext(), "Camera Parameters set", Toast.LENGTH_SHORT).show();
 
         	// Show the camera view on the activity
             cameraPreview = (CameraPreview) findViewById(R.id.camera_preview);
@@ -125,11 +156,52 @@ public class CameraActivity extends Activity implements PictureCallback {
 		@Override
 		public void onAutoFocus(boolean success, Camera camera) {
 			// TODO Auto-generated method stub
-			focusImg.setAlpha(100);
+			focusImg.setAlpha(255);
 	        Log.d("Focused");
 	        Toast.makeText(getApplicationContext(), "Focused", Toast.LENGTH_SHORT).show();
 		}
 	};
+
+    public void onChangeCameraClick(View button){
+    	int currentCameraId = mCamera.hashCode();
+
+    	mCamera.stopPreview();
+    	mCamera.release();
+
+        if(currentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK){
+            currentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+        }
+        else {
+            currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+        }
+
+        // Camera may be in use by another activity or the system or not available at all
+        mCamera = null;
+		try {
+	        mCamera = Camera.open(currentCameraId);
+		} catch (Exception e) {
+			// Camera is not available or doesn't exist
+			Log.d("Camera.open failed", e);
+		}
+
+        if(mCamera != null){
+            cameraPreview.init(mCamera);
+        } else {
+            finish();
+        }
+
+/*
+        mCamera.setCameraDisplayOrientation(currentCameraId);
+        setCameraDisplayOrientation(CameraActivity.this, currentCameraId, mCamera);
+        try {
+            //this step is critical or preview on new camera will no know where to render to
+        	mCamera.setPreviewDisplay(previewHolder);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mCamera.startPreview();
+*/
+    }
 
     @FromXML
     public void onCaptureClick(View button){
@@ -145,18 +217,83 @@ public class CameraActivity extends Activity implements PictureCallback {
 	public void onFocusClick(View button){
         Log.d("Focus clicked");
         Toast.makeText(getApplicationContext(), "Focus clicked", Toast.LENGTH_SHORT).show();
-		focusImg.setAlpha(30);
+		focusImg.setAlpha(100);
     	mCamera.autoFocus(_cameraFocused);
     }
 
+	public void onFlashSettingClick(View button){
+		// Get current flash mode
+    	mCamParams = mCamera.getParameters();
+		Log.d("Current flash mode: " + mCamParams.getFlashMode());
 
-    @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-        Log.d("Picture taken");
-        Toast.makeText(getApplicationContext(), "Picture taken", Toast.LENGTH_LONG).show();
-        String path = _savePictureToFileSystem(data);
+		// Find out next available mode
+		Integer nextFlashModeIndex = mFlashModes.indexOf(mCamParams.getFlashMode()) + 1;
+		if (nextFlashModeIndex >= mFlashModes.size()) {
+			nextFlashModeIndex = 0;
+		}
+        Log.d( "Next flash mode: " + mFlashModes.get(nextFlashModeIndex) );
+
+		// Set it
+        mFlashButton.setText( mFlashModes.get(nextFlashModeIndex));
+    	mCamParams.setFlashMode(mFlashModes.get(nextFlashModeIndex));
+	    mCamera.setParameters(mCamParams);
+	}
+
+	public void onFocusSettingClick(View button){
+/*
+        PopupMenu mFocusModePopup = new PopupMenu(getBaseContext(), button);
+        // Adding menu items to the popumenu
+        mFocusModePopup.getMenuInflater().inflate(R.menu.popup_focus_mode, mFocusModePopup.getMenu());
+        // Defining menu item click listener for the popup menu
+        mFocusModePopup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Toast.makeText(getBaseContext(), "You selected the action : " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        // Showing the popup menu
+        mFocusModePopup.show();
+*/
+
+        // Get current focus mode
+    	mCamParams = mCamera.getParameters();
+		Log.d("Current focus mode: " + mCamParams.getFocusMode());
+
+		// Find out next available mode
+		Integer nextFocusModeIndex = mFocusModes.indexOf(mCamParams.getFocusMode()) + 1;
+		if (nextFocusModeIndex >= mFocusModes.size()) {
+			nextFocusModeIndex = 0;
+		}
+        Log.d( "Next focus mode: " + mFocusModes.get(nextFocusModeIndex) );
+
+		// Set it
+        mFocusButton.setText( mFocusModes.get(nextFocusModeIndex));
+    	mCamParams.setFocusMode(mFocusModes.get(nextFocusModeIndex));
+	    mCamera.setParameters(mCamParams);
+	}
+
+	public void onSaveClick(View button){
+        String path = _savePictureToFileSystem(mPictureData);
         setResult(path);
         finish();
+	}
+
+	public void onDiscardClick(View button){
+        mCamera.startPreview();
+	}
+
+	@Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+		mPictureData = data;
+		mCamera = camera;
+
+        // Show the Save/Discard buttons
+        mSaveButton.setVisibility(View.VISIBLE);
+        mDiscardButton.setVisibility(View.VISIBLE);
+
+		Log.d("Picture taken");
+        Toast.makeText(getApplicationContext(), "Picture taken", Toast.LENGTH_LONG).show();
     }
 
     private static String _savePictureToFileSystem(byte[] data) {
@@ -164,7 +301,16 @@ public class CameraActivity extends Activity implements PictureCallback {
         _saveToFile(data, file);
         return file.getAbsolutePath();
     }
- 
+
+    private int _getFrontCameraId() {
+        CameraInfo ci = new CameraInfo();
+        for (int i = 0 ; i < Camera.getNumberOfCameras(); i++) {
+            Camera.getCameraInfo(i, ci);
+            if (ci.facing == CameraInfo.CAMERA_FACING_FRONT) return i;
+        }
+        return -1; // No front-facing camera found
+    }
+
     private void setResult(String path) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_IMAGE_PATH, path);
@@ -184,6 +330,7 @@ public class CameraActivity extends Activity implements PictureCallback {
         	mCamera = null;
         }
     }
+
 
 /*
     // Set up the {@link android.app.ActionBar}, if the API is available.

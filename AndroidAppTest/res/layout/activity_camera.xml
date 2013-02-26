@@ -16,11 +16,12 @@
         android:src="@drawable/cam_target" />
 
     <ImageView
-        android:id="@+id/cam_focus"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:id="@+id/cam_focus_crosshair"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:alpha="30"
         android:contentDescription="@string/content_desc_overlay"
+        android:layout_gravity="center"
         android:src="@drawable/cam_focus" />
 
     <LinearLayout
@@ -33,6 +34,41 @@
     android:orientation="vertical" >
 
         <Button
+            android:id="@+id/cam_change_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onChangeCameraClick"
+            android:padding="@dimen/padding_medium"
+            android:text="@string/button_change_camera_text" />
+
+        <Button
+            android:id="@+id/cam_focus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFocusClick"
+            android:padding="@dimen/padding_medium"
+            android:text="@string/button_focus_text" />
+
+<!--
+        <Button
+            android:id="@+id/cam_controls_focus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFocusSettingClick"
+            android:padding="@dimen/padding_medium"
+            android:text="@string/button_controls_focus_text" />
+-->
+
+        <Button
+            android:id="@+id/cam_controls_flash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFlashSettingClick"
+            android:padding="@dimen/padding_medium"
+            android:text="@string/button_controls_flash_text" />
+
+        <Button
+            android:id="@+id/cam_click"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onCaptureClick"
@@ -40,17 +76,27 @@
             android:text="@string/button_capture_text" />
 
         <Button
+            android:id="@+id/cam_controls_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onFocusClick"
+            android:onClick="onSaveClick"
             android:padding="@dimen/padding_medium"
-            android:text="@string/button_focus_text" />
+            android:text="@string/button_controls_save_text" />
+
+        <Button
+            android:id="@+id/cam_controls_discard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onDiscardClick"
+            android:padding="@dimen/padding_medium"
+            android:text="@string/button_controls_discard_text" />
 
         <SeekBar
             android:id="@+id/cam_overlay_alpha"
-            android:max="100"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:max="255" />
+
     </LinearLayout>
 </FrameLayout>

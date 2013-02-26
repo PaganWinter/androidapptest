@@ -1,24 +1,29 @@
 package com.voidonaut.androidapptest;
 
-import com.voidonaut.androidapptest.FromXML;
-import com.voidonaut.androidapptest.R;
-import com.voidonaut.androidapptest.util.BitmapHelper;
-import com.voidonaut.androidapptest.util.Log;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import com.voidonaut.androidapptest.util.BitmapHelper;
+import com.voidonaut.androidapptest.util.Log;
 
 //import android.util.Log;
 //import android.view.Menu;
 
 public class MainActivity extends Activity {
-	public final static String EXTRA_MESSAGE = "com.voidonaut.androidapptest.MESSAGE";
+	public final static String EXTRA_OVERLAY_IMG_PATH = "com.voidonaut.androidapptest.OVERLAY_IMG_PATH";
     private static final int CAMERA_PIC_REQUEST = 1337;
 
 	@Override
@@ -32,6 +37,11 @@ public class MainActivity extends Activity {
         }
         TextView cameraDescriptionTextView = (TextView) findViewById(R.id.text_view_camera_description);
         cameraDescriptionTextView.setText(message);
+
+        // List existing Series
+
+        _generateSeriesList();
+
 	}
 
     private boolean cameraNotDetected() {
@@ -43,6 +53,9 @@ public class MainActivity extends Activity {
     public void onUseCameraClick(View view) {
 //    	Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
     	Intent cameraIntent = new Intent(this, CameraActivity.class);
+    	String overLayImagePath = "/storage/emulated/0/Pictures/COAA/test/IMG_20130222_133833.jpg";
+
+    	cameraIntent.putExtra(EXTRA_OVERLAY_IMG_PATH, overLayImagePath);
     	startActivityForResult(cameraIntent, CAMERA_PIC_REQUEST);
     }
 
@@ -66,6 +79,47 @@ public class MainActivity extends Activity {
         ImageView imageView = (ImageView) findViewById(R.id.photo_result_view);
         imageView.setImageBitmap(BitmapHelper._decodeSampledBitmap(path, 300, 250));
     }
+
+    private void _generateSeriesList() {
+//    	http://wptrafficanalyzer.in/blog/listview-with-images-and-text-using-simple-adapter-in-android/
+
+    	List<HashMap<String,String>> mSeriesListData = new ArrayList<HashMap<String,String>>();
+
+	    TextView debug = (TextView) findViewById(R.id.main_debug);
+	    String path = Environment.getExternalStorageDirectory().toString()+"/Pictures/COAA/";
+	    Log.d(path);
+	    File[] mDirs = new File(path).listFiles();
+	    for ( File mDir : mDirs ) {
+	    	Log.d(mDir.getName());
+	        if ( mDir.isDirectory() ) {
+	            String dirPath = Environment.getExternalStorageDirectory().toString()+"/Pictures/COAA/" + mDir.getName();
+	            File[] mFiles = new File(dirPath).listFiles();
+	            for ( File mFile : mFiles ) {
+	            	Log.d(mFile.getName());
+	            }
+	            HashMap<String, String> hm = new HashMap<String,String>();
+	            hm.put("series_name", mDir.getName());
+	            hm.put("series_img_first", mFiles[0].getAbsolutePath());
+	//            hm.put("series_img_last", );
+	            mSeriesListData.add(hm);
+	        }
+	    }
+	
+	    // Keys used in Hashmap
+	    String[] from = { "series_img_first", "series_name" }; 
+	    // Ids of views in listview_series_item
+	    int[] to = { R.id.series_img_first, R.id.series_name };
+	
+	    // Instantiating an adapter to store each items
+	    // R.layout.listview_series_item defines the layout of each item
+	    SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), mSeriesListData, R.layout.listview_series_item, from, to);
+	
+	    // Getting a reference to listview_series_list of main.xml layout file
+	    ListView listView = ( ListView ) findViewById(R.id.listview_series_list);
+	
+	    // Setting the adapter to the listView
+	    listView.setAdapter(adapter);
+	};
 
 /*
     // Called when the user clicks the Send button

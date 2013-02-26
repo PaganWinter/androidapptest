@@ -14,7 +14,7 @@ import android.view.SurfaceView;
  *
  */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
- 
+
     private Camera mCamera;
     private SurfaceHolder mHolder;
  

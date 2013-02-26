@@ -12,7 +12,13 @@
     <string name="title_activity_camera">CameraActivity</string>
     <string name="button_use_camera">Use Camera</string>
     <string name="button_capture_text">Click</string>
-    <string name="button_focus_text">Focus</string>
+    <string name="button_focus_text">Set Focus</string>
+
+    <string name="button_change_camera_text">Select Camera</string>
+    <string name="button_controls_focus_text">Focus</string>
+    <string name="button_controls_flash_text">Flash</string>
+    <string name="button_controls_save_text">Save</string>
+    <string name="button_controls_discard_text">Discard</string>
     <string name="content_desc_overlay">overlay</string>
     <string name="content_desc_image_just_taken">Image just taken</string>
 
