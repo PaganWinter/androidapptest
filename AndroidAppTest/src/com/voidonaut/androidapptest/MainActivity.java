@@ -8,9 +8,12 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -115,10 +118,22 @@ public class MainActivity extends Activity {
 	    SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), mSeriesListData, R.layout.listview_series_item, from, to);
 	
 	    // Getting a reference to listview_series_list of main.xml layout file
-	    ListView listView = ( ListView ) findViewById(R.id.listview_series_list);
+	    final ListView listView = ( ListView ) findViewById(R.id.listview_series_list);
 	
 	    // Setting the adapter to the listView
 	    listView.setAdapter(adapter);
+
+	    listView.setOnItemClickListener(new OnItemClickListener() {
+	        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+	            Log.d( "Position: " + position );
+	            Log.d( "Id: " + Long.toString(id) );
+	            Log.d( "View id: " + Integer.toString(v.getId()) );
+	            Log.d( "Item: " + parent.getAdapter().getItem(position).toString() );
+	            //listView.getItemAtPosition(position);
+//	            Cursor c = (Cursor) parent.getAdapter().getItem(position);
+//	            Log.d( "Item: " + c.getString(c.getColumnIndex("series_img_first")) );
+	        }
+	    });
 	};
 
 /*
