@@ -91,6 +91,7 @@ public class CameraActivity extends Activity implements PictureCallback {
         });
 
         // If front camera exists, enable Change Camera Button
+        // http://stackoverflow.com/questions/6599454/switch-back-front-camera-on-fly
         if (_getFrontCameraId() < 0) {
         	mCameraChangeButton.setVisibility(View.GONE);
         }

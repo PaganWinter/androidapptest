@@ -25,9 +25,12 @@ import com.voidonaut.androidapptest.util.Log;
 //import android.util.Log;
 //import android.view.Menu;
 
+//http://blog.blundell-apps.com/tut-using-the-camera-with-a-custom-overlay/
+
 public class MainActivity extends Activity {
 	public final static String EXTRA_OVERLAY_IMG_PATH = "com.voidonaut.androidapptest.OVERLAY_IMG_PATH";
     private static final int CAMERA_PIC_REQUEST = 1337;
+    private Intent cameraIntent;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,8 @@ public class MainActivity extends Activity {
         cameraDescriptionTextView.setText(message);
 
         // List existing Series
+    	cameraIntent = new Intent(this, CameraActivity.class);
+
 
         _generateSeriesList();
 
@@ -55,7 +60,6 @@ public class MainActivity extends Activity {
     @FromXML
     public void onUseCameraClick(View view) {
 //    	Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-    	Intent cameraIntent = new Intent(this, CameraActivity.class);
     	String overLayImagePath = "/storage/emulated/0/Pictures/COAA/test/IMG_20130222_133833.jpg";
 
     	cameraIntent.putExtra(EXTRA_OVERLAY_IMG_PATH, overLayImagePath);
@@ -123,12 +127,32 @@ public class MainActivity extends Activity {
 	    // Setting the adapter to the listView
 	    listView.setAdapter(adapter);
 
+
 	    listView.setOnItemClickListener(new OnItemClickListener() {
 	        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+	            Log.d( "Parent: " + parent.toString() );
+	            Log.d( "View: " + v.toString() );
 	            Log.d( "Position: " + position );
 	            Log.d( "Id: " + Long.toString(id) );
-	            Log.d( "View id: " + Integer.toString(v.getId()) );
-	            Log.d( "Item: " + parent.getAdapter().getItem(position).toString() );
+	            Log.d( "listView.getItemAtPosition: " + listView.getItemAtPosition(position).toString());
+	            Log.d( "listView.getClass: " + listView.getClass());
+	            HashMap<String, String> hm = new HashMap<String,String>();
+	            hm = ( HashMap<String, String>) listView.getItemAtPosition(position);
+	            Log.d( "hm: " + hm.toString() );
+	            String imgPath = hm.get("series_img_first");
+	            Log.d( "imgPath: " + imgPath );
+
+//	            Intent cameraIntent = new Intent(this, CameraActivity.class);
+	        	String overLayImagePath = imgPath;
+
+	        	cameraIntent.putExtra(EXTRA_OVERLAY_IMG_PATH, overLayImagePath);
+	        	startActivityForResult(cameraIntent, CAMERA_PIC_REQUEST);
+
+
+//	            v.get
+
+//	            Log.d( "View id: " + Integer.toString(v.getId()) );
+//	            Log.d( "Item: " + parent.getAdapter().getItem(position).toString() );
 	            //listView.getItemAtPosition(position);
 //	            Cursor c = (Cursor) parent.getAdapter().getItem(position);
 //	            Log.d( "Item: " + c.getString(c.getColumnIndex("series_img_first")) );
