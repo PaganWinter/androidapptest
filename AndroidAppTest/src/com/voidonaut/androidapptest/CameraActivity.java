@@ -47,6 +47,8 @@ public class CameraActivity extends Activity implements PictureCallback {
     private Button mDiscardButton;
     private Button mCameraChangeButton;
     private byte[] mPictureData;
+    private String mSeriesFolder;
+    
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +75,7 @@ public class CameraActivity extends Activity implements PictureCallback {
 	    Intent intent = getIntent();
 	    String overlayImgPath = intent.getStringExtra(MainActivity.EXTRA_OVERLAY_IMG_PATH);
 	    mImageOverlay.setImageBitmap(BitmapHelper._decodeSampledBitmap(overlayImgPath, 300, 250));
+	    mSeriesFolder = "";
 
 
         mSeekbar.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
@@ -276,6 +279,7 @@ public class CameraActivity extends Activity implements PictureCallback {
 
 	public void onSaveClick(View button){
         String path = _savePictureToFileSystem(mPictureData);
+        // releaseCamera();
         setResult(path);
         finish();
 	}
@@ -327,6 +331,7 @@ public class CameraActivity extends Activity implements PictureCallback {
  
     private void releaseCamera() {
         if(mCamera != null){
+        	mCamera.stopPreview();
         	mCamera.release();
         	mCamera = null;
         }
