@@ -60,7 +60,8 @@ public class MainActivity extends Activity {
     @FromXML
     public void onUseCameraClick(View view) {
 //    	Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-    	String overLayImagePath = "/storage/emulated/0/Pictures/COAA/test/IMG_20130222_133833.jpg";
+//    	String overLayImagePath = "/storage/emulated/0/Pictures/COAA/test/IMG_20130222_133833.jpg";
+    	String overLayImagePath = "";
 
     	cameraIntent.putExtra(EXTRA_OVERLAY_IMG_PATH, overLayImagePath);
     	startActivityForResult(cameraIntent, CAMERA_PIC_REQUEST);

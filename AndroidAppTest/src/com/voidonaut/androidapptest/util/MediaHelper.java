@@ -18,11 +18,12 @@ import android.os.Environment;
  */
 public class MediaHelper {
 
-	public static File _getOutputMediaFile(){
+	public static File _getOutputMediaFile(String seriesFolderName){
 	    // To be safe, you should check that the SDCard is mounted
 	    // using Environment.getExternalStorageState() before doing this.
 
 	    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "COAA");
+
 	    // This location works best if you want the created images to be shared
 	    // between applications and persist after your app has been uninstalled.
 
@@ -34,9 +35,30 @@ public class MediaHelper {
 	        }
 	    }
 
-	    // Create a media file name
+	    // If beginning new series, create seriesFolder for it
+	    if (seriesFolderName == "") {
+	    	seriesFolderName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    	seriesFolderName = "series_" + seriesFolderName;
+	    	Log.d("New series. Creating folder for it");
+	    }
+
+    	Log.d("Using folder: " + seriesFolderName);
+	    File seriesFolder = new File(mediaStorageDir.getPath() + File.separator + seriesFolderName);
+    	if (! seriesFolder.exists()) {
+	        if (! seriesFolder.mkdirs()){
+	            Log.d("failed to create series directory");
+	            return null;
+	        }
+    	}
+
+    	Log.d("seriesFolder.getPath(): " + seriesFolder.getPath());
+
+    	File mediaFile;
 	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-	    File mediaFile = new File(mediaStorageDir.getPath() + File.separator +"IMG_"+ timeStamp +".jpg");
+	    // Create a media file name
+	    mediaFile = new File(seriesFolder.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
+
+    	Log.d("mediaFile: " + seriesFolder.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
 
 	    return mediaFile;
 	}

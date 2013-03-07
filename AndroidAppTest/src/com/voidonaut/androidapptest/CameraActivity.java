@@ -47,7 +47,7 @@ public class CameraActivity extends Activity implements PictureCallback {
     private Button mDiscardButton;
     private Button mCameraChangeButton;
     private byte[] mPictureData;
-    private String mSeriesFolder;
+    private static String mSeriesFolder = "";
     
 
 	@Override
@@ -74,8 +74,14 @@ public class CameraActivity extends Activity implements PictureCallback {
 	    // Get the message from the intent
 	    Intent intent = getIntent();
 	    String overlayImgPath = intent.getStringExtra(MainActivity.EXTRA_OVERLAY_IMG_PATH);
-	    mImageOverlay.setImageBitmap(BitmapHelper._decodeSampledBitmap(overlayImgPath, 300, 250));
-	    mSeriesFolder = "";
+	    Log.d("overlayImgPath: '" + overlayImgPath + "'");
+	    if (!overlayImgPath.isEmpty()) {
+		    mImageOverlay.setImageBitmap(BitmapHelper._decodeSampledBitmap(overlayImgPath, 300, 250));
+//		    mSeriesFolder = overlayImgPath.substring(0, overlayImgPath.lastIndexOf("/"));
+		    mSeriesFolder = new File(overlayImgPath).getParentFile().getName();
+	    }
+	    Log.d("Directory to save to: '" + mSeriesFolder + "'");
+
 
 
         mSeekbar.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
@@ -302,7 +308,7 @@ public class CameraActivity extends Activity implements PictureCallback {
     }
 
     private static String _savePictureToFileSystem(byte[] data) {
-        File file = _getOutputMediaFile();
+        File file = _getOutputMediaFile(mSeriesFolder);
         _saveToFile(data, file);
         return file.getAbsolutePath();
     }
